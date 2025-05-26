@@ -3,7 +3,6 @@ import pandas as pd
 import re
 
 def extract_courses_from_pdf(pdf_path):
-    # download pdf using https://www.stonybrook.edu/commcms/registrar/registration/schedules.php?accordion=content-d19e222
     with pdfplumber.open(pdf_path) as pdf:
         all_text = "\n".join(page.extract_text() for page in pdf.pages)
     
@@ -15,23 +14,23 @@ def extract_courses_from_pdf(pdf_path):
         if not re.match(course_pattern, courses[i]):
             continue
         sections = re.findall(
-            r'(?:[A-Z]{2,}\s+)?'                              # Optional course prefix like "AAS"
-            r'(\d{5})\s+'                                     # (1) Class number
-            r'(\w+)\s+'                                       # (2) Component (LEC/SEM/TUT)
-            r'([A-Z]?\d+)\s+'                                 # (3) Section
-            r'(APPT|HTBA|[MTWRFSU]+)\s+'                      # (4) Days
-            r'(\d{2}:\d{2}-\d{2}:\d{2}[AP]M|-|TBA)\s+'        # (5) Time
-            r'(\d{2}-[A-Z]{3}-\d{4})\s+'                      # (6) Start date
-            r'(\d{2}-[A-Z]{3}-\d{4})\s+'                      # (7) End date
-            r'(TBA|[A-Za-z&/ ]+?)'                            # (8) Building
-            r'(TBA|\S*\d\w*)\s+'                              # (9) Room
-            r'(.+)$',                                         # (10) Instructor
+            r'(?:[A-Z]{2,}\s+)?'                # non-capturing prefix
+            r'(?:\d{5}\s+)?'                    # ✅ non-capturing class number
+            r'(\w+)\s+'                         # (1) Component
+            r'([A-Z]?\d+)\s+'                   # (2) Section
+            r'(APPT|HTBA|[MTWRFSU]+|RECR|RECT)\s+'        # (3) Days
+            r'(\d{2}:\d{2}-\d{2}:\d{2}[AP]M|-|TBA)\s+'  # (4) Time
+            r'(\d{2}-[A-Z]{3}-\d{4})\s+'        # (5) Start date
+            r'(\d{2}-[A-Z]{3}-\d{4})\s+'        # (6) End date
+            r'(TBA|[A-Za-z&/ ]+?)'              # (7) Building
+            r'(TBA|\S*\d\w*)\s+'                # (8) Room
+            r'(.+)$',                           # (9) Instructor
             courses[i+1],
             re.MULTILINE
         )
             
         for section in sections:
-            _, section_type, section_no, days, times, _, _, building, room, instructor = section
+            section_type, section_no, days, times, _, _, building, room, instructor = section
             results.append({
                 "Course Number": courses[i],
                 "Section": f"{section_type} {section_no}",
