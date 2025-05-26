@@ -1,0 +1,1 @@
+A script to read all Stony Brook courses from a pdf and turn it into a csv.
